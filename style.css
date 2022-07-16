@@ -34,19 +34,19 @@
   align-items: center;
 }
 
-.sticky-box--secondary {
+.sticky-box--child {
   display: inline-block;
   border: 1px solid black;
   padding: 10px;
 }
 
-.sticky-box__innercircle--secondary {
+.sticky-box__innercircle--child {
   width: 70px;
   height: 70px;
   border: 1px solid #fff;
 }
 
-.sticky-box__content--secondary {
+.sticky-box__content--child {
   width: 40px;
   height: 40px;
   border: 1px solid #000;
@@ -62,8 +62,8 @@
 .sticky-box,
 .sticky-box__innercircle,
 .sticky-box__content,
-.sticky-box--secondary,
-.sticky-box__innercircle--secondary,
-.sticky-box__content--secondary {
+.sticky-box--child,
+.sticky-box__innercircle--child,
+.sticky-box__content--child {
   box-sizing: border-box;
 }

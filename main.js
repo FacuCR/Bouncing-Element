@@ -2,120 +2,76 @@
 
 let stickyElement = document.querySelector(".sticky-box__content");
 let stickyContainerElement = document.querySelector(".sticky-box");
+let stickyElementChild = document.querySelector(".sticky-box__content--child");
+let stickyElementChildR = stickyElementChild.getBoundingClientRect();
 let stickyContainerElementR = stickyContainerElement.getBoundingClientRect();
 let stickyElementR = stickyElement.getBoundingClientRect();
 // radio of the element
+// TODO: cuando la venta se redimensiona el centro se tiene que volver a cambiar
 let rW = (stickyElementR.right - stickyElementR.left) / 2;
 let rH = (stickyElementR.bottom - stickyElementR.top) / 2;
 // page coords of center
 let oX = (stickyContainerElementR.right + stickyContainerElementR.left) / 2;
 let oY = (stickyContainerElementR.bottom + stickyContainerElementR.top) / 2;
-let x, y;
+let axes = {
+  x: 0,
+  y: 0,
+};
+let childAxes = {
+  x: 0,
+  y: 0,
+};
+const MAX_MOVEMENT = 15;
+const MAX_MOVEMENT_CHILD = 7.5;
 
-let maxMovement = 15;
-
-function setPos(x, y) {
-  stickyElement.style.left = x + oX - rW + "px";
-  stickyElement.style.top = y + oY - rH + "px";
+function setPos(axes, element) {
+  element.style.left = axes.x + oX - rW + "px";
+  element.style.top = axes.y + oY - rH + "px";
 }
 
-setPos(0, 0);
+// set circle position to center
+setPos({ x: 0, y: 0 }, stickyElement);
+setPos({ x: 0, y: 0 }, stickyElementChild);
 
 stickyContainerElement.addEventListener("mouseleave", function (e) {
-  assignXAndYValue(e);
+  axes = assignXAndYValue(e, axes, MAX_MOVEMENT);
+  childAxes = assignXAndYValue(e, childAxes, MAX_MOVEMENT_CHILD);
   // set circle position to the opposite side and then to the center
   // simulating a bouncing effect
-  setPos(-x, -y);
+  setPos(axes, stickyElement);
+  setPos(ChildAxes, stickyElementChild);
   setTimeout(() => {
-    setPos(0, 0);
+    setPos({ x: 0, y: 0 }, stickyElement);
+    setPos({ x: 0, y: 0 }, stickyElementChild);
   }, 300);
 });
 
 stickyContainerElement.addEventListener("mousemove", function (e) {
-  assignXAndYValue(e);
+  axes = assignXAndYValue(e, axes, MAX_MOVEMENT);
+  childAxes = assignXAndYValue(e, childAxes, MAX_MOVEMENT_CHILD);
   // set circle position
-  setPos(x, y);
+  setPos(axes, stickyElement);
+  setPos(ChildAxes, stickyElementChild);
 });
 
-
 // check limit to maxMovement
-function checkMaxAllowedMovementIsExceeded(pos) {
+function checkMaxAllowedMovementIsExceeded(pos, maxMovement) {
   return Math.abs(pos) > maxMovement;
 }
 
-function assignXAndYValue(e) {
+function assignXAndYValue(e, axes, maxMovement) {
   // 0,0 is at center
   x = e.clientX - oX;
   y = e.clientY - oY;
   // limit to maxMovement
-  if (checkMaxAllowedMovementIsExceeded(x)) {
+  if (checkMaxAllowedMovementIsExceeded(x, maxMovement)) {
     x = x > maxMovement ? maxMovement : -maxMovement;
   }
-  if (checkMaxAllowedMovementIsExceeded(y)) {
+  if (checkMaxAllowedMovementIsExceeded(y, maxMovement)) {
     y = y > maxMovement ? maxMovement : -maxMovement;
   }
-}
+  axes.x = x;
+  axes.y = y;
 
-
-
-
-
-
-
-
-
-
-let stickyElementSecondary = document.querySelector(".sticky-box__content--secondary");
-let stickyElementSecondaryR = stickyElementSecondary.getBoundingClientRect();
-// radio of the element
-let rWSecondary = (stickyElementSecondaryR.right + stickyElementSecondaryR.left - 20) / 2;
-let rHSecondary = (stickyElementSecondaryR.bottom + stickyElementSecondaryR.top - 20) / 2;
-let xSecondary, ySecondary;
-
-let maxMovementSecondary = 7.5;
-
-function setPosSecondary(x, y) {
-  stickyElementSecondary.style.left = x + oX - rWSecondary + "px";
-  stickyElementSecondary.style.top = y + oY - rHSecondary + "px";
-}
-
-setPosSecondary(0, 0);
-
-stickyContainerElement.addEventListener("mouseleave", function (e) {
-  assignXAndYSecondaryValue(e);
-  // set circle position to the opposite side and then to the center
-  // simulating a bouncing effect
-  setPosSecondary(-xSecondary, -ySecondary);
-  setTimeout(() => {
-    setPosSecondary(0, 0);
-  }, 300);
-});
-
-stickyContainerElement.addEventListener("mousemove", function (e) {
-  assignXAndYSecondaryValue(e);
-  // set circle position
-  setPosSecondary(xSecondary, ySecondary);
-});
-
-
-function setPosSecondary(x, y) {
-  stickyElementSecondary.style.left = x + oX - rWSecondary + "px";
-  stickyElementSecondary.style.top = y + oY - rHSecondary + "px";
-}
-
-function assignXAndYSecondaryValue(e) {
-  // 0,0 is at center
-  xSecondary = e.clientX - oX;
-  ySecondary = e.clientY - oY;
-  // limit to maxMovement
-  if (checkMaxAllowedMovementSecondaryIsExceeded(xSecondary)) {
-    xSecondary = xSecondary > maxMovementSecondary ? maxMovementSecondary : -maxMovementSecondary;
-  }
-  if (checkMaxAllowedMovementSecondaryIsExceeded(ySecondary)) {
-    ySecondary = ySecondary > maxMovementSecondary ? maxMovementSecondary : -maxMovementSecondary;
-  }
-}
-
-function checkMaxAllowedMovementSecondaryIsExceeded(pos) {
-  return Math.abs(pos) > maxMovementSecondary;
+  return axes;
 }
