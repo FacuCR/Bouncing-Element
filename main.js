@@ -1,18 +1,19 @@
 "use strict";
 
-let stickyElement = document.querySelector(".sticky-box__content");
-let stickyContainerElement = document.querySelector(".sticky-box");
-let stickyElementChild = document.querySelector(".sticky-box__content--child");
-let stickyElementChildR = stickyElementChild.getBoundingClientRect();
-let stickyContainerElementR = stickyContainerElement.getBoundingClientRect();
-let stickyElementR = stickyElement.getBoundingClientRect();
+let magneticContainerElement = document.querySelector(".magnetic-box");
+let magneticContainerElementR = new DOMRect();
+let magneticElement = document.querySelector(".magnetic-box__content");
+let magneticElementR = new DOMRect();
+let magneticElementChild = document.querySelector(".magnetic-box__content--child");
+let magneticElementChildR = new DOMRect();
 // radio of the element
-// TODO: cuando la venta se redimensiona el centro se tiene que volver a cambiar
-let rW = (stickyElementR.right - stickyElementR.left) / 2;
-let rH = (stickyElementR.bottom - stickyElementR.top) / 2;
+let rW = 0,
+  rH = 0,
+  rWChild = 0,
+  rHChild = 0;
 // page coords of center
-let oX = (stickyContainerElementR.right + stickyContainerElementR.left) / 2;
-let oY = (stickyContainerElementR.bottom + stickyContainerElementR.top) / 2;
+let oX = 0,
+  oY = 0;
 let axes = {
   x: 0,
   y: 0,
@@ -21,38 +22,46 @@ let childAxes = {
   x: 0,
   y: 0,
 };
-const MAX_MOVEMENT = 15;
-const MAX_MOVEMENT_CHILD = 7.5;
+const MAX_MOVEMENT = 10,
+  MAX_MOVEMENT_CHILD = 5;
 
-function setPos(axes, element) {
+magneticContainerElement.addEventListener("mouseleave", function () {
+  // set circle position to the opposite side and then to the center
+  // simulating a bouncing effect
+  axes.x = -axes.x;
+  axes.y = -axes.y;
+  childAxes.x = -childAxes.x;
+  childAxes.y = -childAxes.y;
+  setPos(axes, magneticElement, rW, rH);
+  setPos(childAxes, magneticElementChild, rWChild, rHChild);
+  setTimeout(() => {
+    centerTwoElements();
+  }, 300);
+});
+
+magneticContainerElement.addEventListener("mousemove", function (e) {
+  axes = assignXAndYValue(e, axes, MAX_MOVEMENT);
+  childAxes = assignXAndYValue(e, childAxes, MAX_MOVEMENT_CHILD);
+  // set circle position
+  setPos(axes, magneticElement, rW, rH);
+  setPos(childAxes, magneticElementChild, rWChild, rHChild);
+});
+
+function setPos(axes, element, rW, rH) {
   element.style.left = axes.x + oX - rW + "px";
   element.style.top = axes.y + oY - rH + "px";
 }
 
 // set circle position to center
-setPos({ x: 0, y: 0 }, stickyElement);
-setPos({ x: 0, y: 0 }, stickyElementChild);
+function centerElement(element, rW, rH) {
+  setPos({ x: 0, y: 0 }, element, rW, rH);
+}
 
-stickyContainerElement.addEventListener("mouseleave", function (e) {
-  axes = assignXAndYValue(e, axes, MAX_MOVEMENT);
-  childAxes = assignXAndYValue(e, childAxes, MAX_MOVEMENT_CHILD);
-  // set circle position to the opposite side and then to the center
-  // simulating a bouncing effect
-  setPos(axes, stickyElement);
-  setPos(ChildAxes, stickyElementChild);
-  setTimeout(() => {
-    setPos({ x: 0, y: 0 }, stickyElement);
-    setPos({ x: 0, y: 0 }, stickyElementChild);
-  }, 300);
-});
-
-stickyContainerElement.addEventListener("mousemove", function (e) {
-  axes = assignXAndYValue(e, axes, MAX_MOVEMENT);
-  childAxes = assignXAndYValue(e, childAxes, MAX_MOVEMENT_CHILD);
-  // set circle position
-  setPos(axes, stickyElement);
-  setPos(ChildAxes, stickyElementChild);
-});
+// set two circles position to center
+function centerTwoElements() {
+  centerElement(magneticElement, rW, rH);
+  centerElement(magneticElementChild, rWChild, rHChild);
+}
 
 // check limit to maxMovement
 function checkMaxAllowedMovementIsExceeded(pos, maxMovement) {
@@ -61,8 +70,8 @@ function checkMaxAllowedMovementIsExceeded(pos, maxMovement) {
 
 function assignXAndYValue(e, axes, maxMovement) {
   // 0,0 is at center
-  x = e.clientX - oX;
-  y = e.clientY - oY;
+  let x = e.clientX - oX;
+  let y = e.clientY - oY;
   // limit to maxMovement
   if (checkMaxAllowedMovementIsExceeded(x, maxMovement)) {
     x = x > maxMovement ? maxMovement : -maxMovement;
@@ -75,3 +84,29 @@ function assignXAndYValue(e, axes, maxMovement) {
 
   return axes;
 }
+
+function asignar() {
+  magneticContainerElementR = magneticContainerElement.getBoundingClientRect();
+  magneticElementR = magneticElement.getBoundingClientRect();
+  magneticElementChildR = magneticElementChild.getBoundingClientRect();
+  // radio of the element
+  rW = (magneticElementR.right - magneticElementR.left) / 2;
+  rH = (magneticElementR.bottom - magneticElementR.top) / 2;
+  // TODO: el centro del child se coloca mal al redimensionar
+  rWChild = (magneticElementChildR.right + magneticElementChildR.left) / 2;
+  rHChild = (magneticElementChildR.bottom + magneticElementChildR.top) / 2;
+  // page coords of center
+  oX = (magneticContainerElementR.right + magneticContainerElementR.left) / 2;
+  oY = (magneticContainerElementR.bottom + magneticContainerElementR.top) / 2;
+}
+
+window.addEventListener("load", () => {
+  asignar();
+  // set circle position to center
+  centerTwoElements();
+});
+window.addEventListener("resize", () => {
+  asignar();
+  // set circle position to center
+  centerTwoElements();
+});
